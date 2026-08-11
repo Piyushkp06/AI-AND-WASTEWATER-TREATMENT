@@ -1,5 +1,6 @@
 import joblib
 import numpy as np
+import os
 
 class BlowerControlAgent:
     """
@@ -8,7 +9,11 @@ class BlowerControlAgent:
     required to maintain a target Dissolved Oxygen (DO) level, 
     thereby minimizing unnecessary energy consumption.
     """
-    def __init__(self, model_path='../../models/aeration_rf_model.pkl'):
+    def __init__(self, model_path=None):
+        if model_path is None:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            model_path = os.path.join(script_dir, '..', '..', 'models', 'aeration_rf_model.pkl')
+            
         print(f"Loading Aeration Model from {model_path}...")
         try:
             self.model = joblib.load(model_path)
@@ -24,9 +29,12 @@ class BlowerControlAgent:
         if not self.model:
             return 1500.0 # Safe default fallback
         
+        # Calculate engineered feature
+        cod_load_kg_h = (inlet_flow * inlet_cod) / 1000.0
+        
         # Features must match the training script: 
-        # ['inlet_flow_rate_m3h', 'inlet_cod_mgL', 'effluent_do_mgL']
-        features = np.array([[inlet_flow, inlet_cod, target_do]])
+        # ['inlet_flow_rate_m3h', 'inlet_cod_mgL', 'COD_load_kg_h', 'effluent_do_mgL']
+        features = np.array([[inlet_flow, inlet_cod, cod_load_kg_h, target_do]])
         recommended_rpm = self.model.predict(features)[0]
         
         # Enforce physical hardware limits

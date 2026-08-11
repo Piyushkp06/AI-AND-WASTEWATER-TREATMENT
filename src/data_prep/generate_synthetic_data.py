@@ -3,7 +3,11 @@ import numpy as np
 from datetime import datetime, timedelta
 import os
 
-def generate_wwt_data(num_samples=10000, output_path='../../data/raw/synthetic_wwt_data.csv'):
+def generate_wwt_data(num_samples=10000):
+    # Resolve path relative to this script's location to be robust regardless of where it is run from
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    output_path = os.path.join(script_dir, '..', '..', 'data', 'raw', 'synthetic_wwt_data.csv')
+    
     np.random.seed(42)
     
     # Time series over several months
@@ -64,11 +68,19 @@ def generate_wwt_data(num_samples=10000, output_path='../../data/raw/synthetic_w
         'effluent_cod_mgL': effluent_cod
     })
     
+    # Inject missing values (NaNs) to simulate sensor drops (approx 1% data loss on some columns)
+    nan_mask_flow = np.random.rand(num_samples) < 0.01
+    df.loc[nan_mask_flow, 'inlet_flow_rate_m3h'] = np.nan
+    
+    nan_mask_cod = np.random.rand(num_samples) < 0.01
+    df.loc[nan_mask_cod, 'inlet_cod_mgL'] = np.nan
+    
     # Ensure directory exists
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     df.to_csv(output_path, index=False)
     print(f"Successfully generated {num_samples} samples of synthetic WWT data at {output_path}")
     print(df.head())
+    print(f"Introduced {df.isna().sum().sum()} total missing values to simulate sensor drops.")
 
 if __name__ == "__main__":
     generate_wwt_data()

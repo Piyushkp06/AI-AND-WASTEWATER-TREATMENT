@@ -5,8 +5,9 @@ import joblib
 import os
 
 def train_anomaly_detector():
-    data_path = '../../data/raw/synthetic_wwt_data.csv'
-    model_save_path = '../../models/anomaly_detector_if.pkl'
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(script_dir, '..', '..', 'data', 'processed', 'processed_wwt_data.csv')
+    model_save_path = os.path.join(script_dir, '..', '..', 'models', 'anomaly_detector_if.pkl')
     
     print(f"Loading data from {data_path}...")
     df = pd.read_csv(data_path)
@@ -18,7 +19,8 @@ def train_anomaly_detector():
         'inlet_pH', 
         'inlet_temp_C', 
         'inlet_turbidity_NTU', 
-        'inlet_cod_mgL'
+        'inlet_cod_mgL',
+        'COD_load_kg_h'
     ]
     
     X = df[features]

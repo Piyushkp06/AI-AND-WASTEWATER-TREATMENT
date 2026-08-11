@@ -1,6 +1,7 @@
 import joblib
 import numpy as np
 import time
+import os
 
 class RuntimeMonitor:
     """
@@ -8,7 +9,11 @@ class RuntimeMonitor:
     Uses an Isolation Forest to detect anomalous influent streams
     in real-time to alert operators before non-compliant effluent is discharged.
     """
-    def __init__(self, model_path='../../models/anomaly_detector_if.pkl'):
+    def __init__(self, model_path=None):
+        if model_path is None:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            model_path = os.path.join(script_dir, '..', '..', 'models', 'anomaly_detector_if.pkl')
+            
         print(f"Initializing Runtime Monitor...")
         try:
             self.model = joblib.load(model_path)
@@ -19,9 +24,12 @@ class RuntimeMonitor:
     def check_for_anomalies(self, flow, ph, temp, turbidity, cod):
         if not self.model:
             return False
+            
+        # Calculate engineered feature
+        cod_load_kg_h = (flow * cod) / 1000.0
         
         # Features must match the training script: 
-        features = np.array([[flow, ph, temp, turbidity, cod]])
+        features = np.array([[flow, ph, temp, turbidity, cod, cod_load_kg_h]])
         prediction = self.model.predict(features)[0]
         
         # Isolation Forest returns -1 for outliers, 1 for inliers
@@ -29,10 +37,10 @@ class RuntimeMonitor:
         
         if is_anomaly:
             print(f"!!! [ALERT] ANOMALY DETECTED !!!")
-            print(f"   Sensors: pH={ph}, COD={cod} mg/L, Temp={temp}C")
+            print(f"   Sensors: pH={ph}, COD={cod} mg/L, Temp={temp}C, COD Load={cod_load_kg_h:.2f} kg/h")
             print(f"   Action Required: Verify sensors or divert flow to holding tank.")
         else:
-            print(f"[OK] System Normal. pH={ph}, COD={cod}")
+            print(f"[OK] System Normal. pH={ph}, COD={cod}, COD Load={cod_load_kg_h:.2f} kg/h")
             
         return is_anomaly
 

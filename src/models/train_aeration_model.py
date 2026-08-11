@@ -7,8 +7,9 @@ import joblib
 import os
 
 def train_aeration_control_model():
-    data_path = '../../data/raw/synthetic_wwt_data.csv'
-    model_save_path = '../../models/aeration_rf_model.pkl'
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(script_dir, '..', '..', 'data', 'processed', 'processed_wwt_data.csv')
+    model_save_path = os.path.join(script_dir, '..', '..', 'models', 'aeration_rf_model.pkl')
     
     print(f"Loading data from {data_path}...")
     df = pd.read_csv(data_path)
@@ -20,6 +21,7 @@ def train_aeration_control_model():
     features = [
         'inlet_flow_rate_m3h', 
         'inlet_cod_mgL', 
+        'COD_load_kg_h',
         'effluent_do_mgL' # Treated as Target DO for the recommendation
     ]
     target = 'aeration_blower_rpm'

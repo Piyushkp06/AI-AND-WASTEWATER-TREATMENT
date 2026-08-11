@@ -61,29 +61,41 @@ If you need to generate a synthetic dataset for testing:
 python src/data_prep/generate_synthetic_data.py
 ```
 
-### 2. Train Chemical Dosing Model
+### 2. Data Preprocessing
+After generating data, run the preprocessing script to handle missing values and engineer new features (e.g., `COD_load_kg_h`):
+```bash
+python src/data_prep/preprocess_data.py
+```
+*Outputs `processed_wwt_data.csv` to the `data/processed/` folder.*
+
+### 3. Train Chemical Dosing Model
 ```bash
 python src/models/train_dosing_model.py
 ```
 *Outputs `chemical_dosing_xgb.pkl` to the `models/` folder.*
 
-### 3. Train Aeration Control Model
+### 4. Train Aeration Control Model
 ```bash
 python src/models/train_aeration_model.py
 ```
 *Outputs `aeration_rf_model.pkl` to the `models/` folder.*
 
-### 4. Train Anomaly Detection Model
+### 5. Train Anomaly Detection Model
 ```bash
 python src/models/train_anomaly_detector.py
 ```
 *Outputs `anomaly_detector_if.pkl` to the `models/` folder.*
 
-### 5. Run Real-Time Monitor Simulation
+### 6. Run Real-Time Monitor Simulation
 To test the anomaly detection against simulated toxic shocks:
 ```bash
 python src/monitoring/runtime_monitor.py
 ```
+
+---
+
+## 📈 Evaluation Results
+You can find the latest training metrics, feature importance scores, and model performance details in the **[results.md](file:///c:/Users/pkpan/AI&WWT/JSL_Angul_WWT_Project/results.md)** file at the root of the project.
 
 ---
 
